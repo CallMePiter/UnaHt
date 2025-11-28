@@ -1,0 +1,145 @@
+# repositorio
+
+import requests
+import os
+#cabeçudos clientela
+class Cliente:
+    def _init_(self, nome, idade, cep):
+        self.nome = nome
+        self.idade = idade
+        self.cep = cep
+
+
+# Listinhassssss
+clientes = []
+
+#matrix o filme
+matriz_exemplo = [
+    [10, 20, 30],
+    [40, 50, 60],
+    [70, 80, 90]
+]
+
+
+#armazem
+def salvar_arquivo():
+    with open("clientes.txt", "w") as f:
+        for c in clientes:
+            f.write(f"{c.nome};{c.idade};{c.cep}\n")
+
+
+def carregar_arquivo():
+    if not os.path.exists("clientes.txt"):
+        return
+
+    with open("clientes.txt", "r") as f:
+        for linha in f:
+            partes = linha.strip().split(";")
+            if len(partes) == 3:
+                nome, idade, cep = partes
+                clientes.append(Cliente(nome, int(idade), cep))
+
+
+#ceeepp
+def consultar_cep(cep):
+    url = f"https://viacep.com.br/ws/{cep}/json/"
+    r = requests.get(url)
+
+    if r.status_code == 200:
+        return r.json()
+    else:
+        return {"erro": "Não foi possível consultar"}
+
+
+#api
+def cotacao_dolar():
+    url = "https://economia.awesomeapi.com.br/json/last/USD-BRL"
+    r = requests.get(url)
+    data = r.json()
+    return float(data["USDBRL"]["bid"])
+
+
+
+def buscar_cliente_recursivo(lista, nome, pos=0):
+    if pos >= len(lista):
+        return None
+
+    if lista[pos].nome.lower() == nome.lower():
+        return lista[pos]
+
+    return buscar_cliente_recursivo(lista, nome, pos + 1)
+
+
+def menu():
+    carregar_arquivo()
+
+    while True:
+        print("\n==========================")
+        print("        MENU")
+        print("==========================")
+        print("1. Cadastrar cliente")
+        print("2. Listar clientes")
+        print("3. Buscar cliente (recursivo)")
+        print("4. Consultar CEP (API)")
+        print("5. Cotação do dólar (API)")
+        print("6. Mostrar matriz")
+        print("7. Salvar e sair")
+        print("==========================")
+
+        opcao = input("Escolha uma opção: ")
+
+      
+        if opcao == "1":
+            nome = input("Nome: ")
+            idade = int(input("Idade: "))
+            cep = input("CEP: ")
+            clientes.append(Cliente(nome, idade, cep))
+            print("Cliente cadastrado!")
+
+        #memorizar
+        elif opcao == "2":
+            if len(clientes) == 0:
+                print("Nenhum cliente cadastrado.")
+            else:
+                for c in clientes:
+                    print(f"{c.nome} - {c.idade} anos - CEP: {c.cep}")
+
+       
+        elif opcao == "3":
+            nome = input("Nome para buscar: ")
+            achado = buscar_cliente_recursivo(clientes, nome)
+            if achado:
+                print(f"Encontrado: {achado.nome}, {achado.idade}, CEP {achado.cep}")
+            else:
+                print("Cliente não encontrado.")
+
+       
+        elif opcao == "4":
+            cep = input("Digite o CEP: ")
+            dados = consultar_cep(cep)
+            print(dados)
+
+       
+        elif opcao == "5":
+            print("Cotação do dólar agora:")
+            print("US$ 1 = R$", cotacao_dolar())
+
+        
+        elif opcao == "6":
+            print("Matriz de exemplo:")
+            for linha in matriz_exemplo:
+                print(linha)
+
+        
+        elif opcao == "7":
+            salvar_arquivo()
+            print("Dados salvos. Saindo...")
+            break
+
+        else:
+            print("Opção inválida! Tente novamente.")
+
+
+
+menu()
+
